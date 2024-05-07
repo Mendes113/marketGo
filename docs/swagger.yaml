@@ -1,0 +1,223 @@
+basePath: /
+definitions:
+  models.InvoiceRequest:
+    properties:
+      total_quantity:
+        type: integer
+      uuid_product:
+        type: string
+    type: object
+  models.Market:
+    properties:
+      email:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      owner:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
+      uuid:
+        type: string
+    type: object
+  models.Product:
+    properties:
+      market_uuid:
+        type: string
+      price:
+        type: number
+      product_name:
+        type: string
+      quantity:
+        type: integer
+      uuid_product:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: API para gerenciar mercados e produtos
+  title: MarketGo API
+  version: "1.0"
+paths:
+  /invoices:
+    post:
+      consumes:
+      - application/json
+      description: Create a new invoice
+      operationId: create-invoice
+      parameters:
+      - description: Invoice object that needs to be added
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.InvoiceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.InvoiceRequest'
+      summary: Create a new invoice
+      tags:
+      - invoices
+  /markets:
+    get:
+      description: Get list of markets
+      operationId: get-markets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Market'
+            type: array
+      summary: Get list of markets
+      tags:
+      - markets
+    post:
+      consumes:
+      - application/json
+      description: Create a new market
+      operationId: create-market
+      parameters:
+      - description: Market object that needs to be added
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Market'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Market'
+      summary: Create a new market
+      tags:
+      - markets
+  /markets/{id}:
+    delete:
+      description: Delete a market by ID
+      operationId: delete-market
+      parameters:
+      - description: Market ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a market by ID
+      tags:
+      - markets
+    get:
+      description: Get a market by ID
+      operationId: get-market
+      parameters:
+      - description: Market ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Market'
+      summary: Get a market by ID
+      tags:
+      - markets
+  /products:
+    get:
+      description: Get list of products
+      operationId: get-products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+      summary: Get list of products
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      description: Delete a product by ID
+      operationId: delete-product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a product by ID
+      tags:
+      - products
+    get:
+      description: Get a product by ID
+      operationId: get-product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+      summary: Get a product by ID
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Update a product by ID
+      operationId: update-product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product object that needs to be updated
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update a product by ID
+      tags:
+      - products
+produces:
+- application/json
+schemes:
+- http
+swagger: "2.0"
