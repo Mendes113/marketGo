@@ -1,22 +1,31 @@
-//	@title			MarketGo API
-//	@version		1.0
-//	@description	API para gerenciar mercados e produtos
-//	@host			localhost:3000
-//	@BasePath		/
-//	@schemes		http
-//	@produce		json
-//	@consumes		json
+// @title			MarketGo API
+// @version		1.0
+// @description	API para gerenciar mercados e produtos
+// @host			localhost:3000
+// @BasePath		/
+// @schemes		http
+// @produce		json
+// @consumes		json
 package routes
 
 import (
+	"marketgo/auth"
 	"marketgo/handlers"
+
+	_ "marketgo/docs"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
-	_"marketgo/docs"
 )
 
 func Setup(app *fiber.App) {
+
+	app.Get("/login", handlers.LoginHandler)
+	app.Post("/register", handlers.Register)
+	protectedRoutes := app.Group("/api/", auth.AuthMiddleware)
+	protectedRoutes.Get("/markets", handlers.GetMarkets)	
+
+
 	app.Get("/swagger/*", swagger.HandlerDefault) // default
 
 	app.Get("/swagger/*", swagger.New(swagger.Config{ // custom

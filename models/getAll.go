@@ -6,6 +6,7 @@ import (
     "encoding/json"
 	"go.mongodb.org/mongo-driver/bson"
 	_ "go.mongodb.org/mongo-driver/mongo/options"
+    "github.com/go-playground/validator/v10"
 )
 
 type Response struct {
@@ -60,6 +61,13 @@ func GetAll() ([]byte, error) {
 
 
 func InsertMarket(market Market) error {
+
+    validate = validator.New()
+    err := validate.Struct(market)
+    if err != nil {
+        return err
+    }
+
 	client, err := db.OpenConnection()
 	if err != nil {
 		return err
@@ -79,6 +87,13 @@ func InsertMarket(market Market) error {
 }
 
 func GetMarket(uuid string) (error, *Market) {
+
+    validator := validator.New()
+    err := validator.Var(uuid, "required")
+    if err != nil {
+        return err, nil
+    }
+    
     client, err := db.OpenConnection()
     if err != nil {
         return err, nil
@@ -96,6 +111,15 @@ func GetMarket(uuid string) (error, *Market) {
 }
 
 func UpdateMarket(uuid string, market Market) error {
+
+    validator := validator.New()
+    err := validator.Struct(market)
+    if err != nil {
+        return err
+    }
+
+
+
     client, err := db.OpenConnection()
     if err != nil {
         return err
@@ -119,6 +143,14 @@ func UpdateMarket(uuid string, market Market) error {
 
 
 func RemoveProductFromMarket(uuid string, productUUID string) error {
+
+    validator := validator.New()
+    err := validator.Var(uuid, "required")
+    if err != nil {
+        return err
+    }
+
+
     client, err := db.OpenConnection()
     if err != nil {
         return err
@@ -139,6 +171,13 @@ func RemoveProductFromMarket(uuid string, productUUID string) error {
 //uses the market uuid to get the products
 
 func GetProductsFromMarket(uuid string) ([]byte, error) {
+
+    validator := validator.New()
+    err := validator.Var(uuid, "required")
+    if err != nil {
+        return nil, err
+    }
+
     client, err := db.OpenConnection()
     if err != nil {
         return nil, err
@@ -165,6 +204,19 @@ func GetProductsFromMarket(uuid string) ([]byte, error) {
 //append product to market
 
 func AppendProductToMarket(uuid string, product Product) error {
+
+    validator := validator.New()
+    err := validator.Var(uuid, "required")
+    if err != nil {
+        return err
+    }
+
+    err = validator.Struct(product)
+    if err != nil {
+        return err
+    }
+
+
     client, err := db.OpenConnection()
     if err != nil {
         return err

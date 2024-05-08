@@ -8,6 +8,7 @@ import (
 	"log"
 	"marketgo/db"
 
+	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -54,8 +55,16 @@ func GetAllProdutcts() ([]byte, error) {
 
 
 func InsertProduct(product Product) error {
-	// Abrir conexão com o banco de dados
-	client, err := db.OpenConnection()
+	
+    validate := validator.New()
+    err := validate.Struct(product)
+    if err != nil {
+        return err 
+    }
+
+    
+    
+    client, err := db.OpenConnection()
 	if err != nil {
 		return err
 	}
@@ -83,7 +92,13 @@ func InsertProduct(product Product) error {
 
 
 func GetProduct(uuid string) (*Product, error) {
-	// Abrir conexão com o banco de dados
+
+    validate := validator.New()
+    err := validate.Var(uuid, "required")
+    if err != nil {
+        return nil, err
+    }
+
 	client, err := db.OpenConnection()
 	if err != nil {
 		return  nil, err
@@ -126,7 +141,13 @@ func CountProduct() (int64, error) {
 }
 
 func UpdateProduct(uuid string, product Product) error {
-    // Abrir conexão com o banco de dados
+
+    validate := validator.New()
+    err := validate.Struct(product)
+    if err != nil {
+        return err
+    } 
+    
     client, err := db.OpenConnection()
     if err != nil {
         return err
@@ -175,7 +196,13 @@ func UpdateProduct(uuid string, product Product) error {
 
 
 func DeleteProduct(uuid string) error {
-    // Abrir conexão com o banco de dados
+   
+    validate := validator.New()
+    err := validate.Var(uuid, "required")
+    if err != nil {
+        return err
+    }
+
     client, err := db.OpenConnection()
     if err != nil {
         return err
@@ -198,6 +225,20 @@ func UpdateProductQuantity(uuid string, newQuantity int) error {
     log.Println(uuid)
     log.Println(newQuantity)
 
+    validate := validator.New()
+    err := validate.Var(uuid, "required")
+    if err != nil {
+        return err
+    }
+
+    validate = validator.New()
+    err = validate.Var(newQuantity, "required")
+    if err != nil {
+        return err
+    }
+
+
+    
     // Verificar se a nova quantidade é negativa
     if newQuantity < 0 {
         return errors.New("quantity cannot be negative")
@@ -215,7 +256,7 @@ func UpdateProductQuantity(uuid string, newQuantity int) error {
         return err
     }
     if !isAvailable {
-        return errors.New("Current quantity is negative")
+        return errors.New("Current Quantity Is Negative")
     }
 
     // Verificar se a nova quantidade é disponível
@@ -249,7 +290,19 @@ func UpdateProductQuantity(uuid string, newQuantity int) error {
 
 //validate if quantity is available
 func ValidateQuantity(uuid string, quantity int) (bool, error) {
-    // Abrir conexão com o banco de dados
+    
+    validate := validator.New()
+    err := validate.Var(uuid, "required")
+    if err != nil {
+        return false, err
+    }
+
+    validate = validator.New()
+    err = validate.Var(quantity, "required")
+    if err != nil {
+        return false, err
+    }
+
     client, err := db.OpenConnection()
     if err != nil {
         return false, err
@@ -274,7 +327,13 @@ func ValidateQuantity(uuid string, quantity int) (bool, error) {
 
 
 func GetProductNameWithUUID(uuid string) (string, error) {
-    // Abrir conexão com o banco de dados
+    
+    validate := validator.New()
+    err := validate.Var(uuid, "required")
+    if err != nil {
+        return "", err
+    }
+
     client, err := db.OpenConnection()
     if err != nil {
         return "", err
