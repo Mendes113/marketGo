@@ -116,5 +116,22 @@ func UpdateMarket(c *fiber.Ctx) error {
 }
 
 
+// DeleteMarket is a handler that deletes a market by ID
+//@Tags markets
+//@Summary Delete a market by ID
+//@Description Delete a market by ID
+//@ID delete-market
+//@Param id path int true "Market ID"
+//@Success 204
+//@Router /markets/{id} [delete]
+func DeleteMarket(c *fiber.Ctx) error {
+  id := c.Params("id")
+  err := models.DeleteMarket(id)
+  if err != nil {
+    log.Println("Error deleting market", err)
+    return c.SendStatus(fiber.StatusInternalServerError)
+  }
 
+  return c.SendStatus(fiber.StatusOK)
+}
 

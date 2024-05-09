@@ -231,6 +231,28 @@ func AppendProductToMarket(uuid string, product Product) error {
     return err
 }
 
+func DeleteMarket(uuid string) error {
+
+    validator := validator.New()
+    err := validator.Var(uuid, "required")
+    if err != nil {
+        return err
+    }
+
+    client, err := db.OpenConnection()
+    if err != nil {
+        return err
+    }
+    defer db.Close(client)
+
+    collection := client.Database("market").Collection("markets")
+    _, err = collection.DeleteOne(context.Background(), bson.M{"UUID": uuid})
+
+    return err
+}
+
+
+
 
 
 

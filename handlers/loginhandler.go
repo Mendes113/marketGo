@@ -11,6 +11,16 @@ import (
 )
 
 // LoginHandler é um manipulador de rota para o processo de login
+// @Summary Processo de login
+// @Description Processo de login
+// @ID login
+// @Accept json
+// @Produce json
+// @Param body body models.LoginRequest true "Credenciais de login"
+// @Success 200 {object} TokenResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Router /login [post]
 func LoginHandler(c *fiber.Ctx) error {
     // Parse do corpo da requisição para obter as credenciais do usuário
     var loginData models.LoginRequest
@@ -24,20 +34,23 @@ func LoginHandler(c *fiber.Ctx) error {
     }
 
     // Se as credenciais forem válidas, crie e assine um token JWT
-    token := jwt.New(jwt.SigningMethodHS256)
-    claims := token.Claims.(jwt.MapClaims)
-    claims["username"] = loginData.Username
-    claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // Token válido por 24 horas
-
     // Obtenha a chave secreta da variável de ambiente
-    secretKey := os.Getenv("JWT_SECRET_KEY")
-    if secretKey == "" {
+    jwtKey := []byte(os.Getenv("JWT_SECRET_KEY"))
+    if len(jwtKey) == 0 {
         // Se a variável de ambiente não estiver definida, retorne um erro
         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Chave secreta JWT não definida"})
     }
+    //remover antes do commit
+    log.Print(jwtKey)
 
+    expirationTime := time.Now().Add(time.Hour * 24) // Token válido por 24 horas
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "username": loginData.Username,
+        "exp": expirationTime.Unix(),
+    })
+    
     // Assinar o token com a chave secreta e obter a string do token
-    tokenString, err := token.SignedString([]byte(secretKey))
+    tokenString, err := token.SignedString(jwtKey)
     if err != nil {
         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Falha ao gerar o token"})
     }
@@ -46,7 +59,17 @@ func LoginHandler(c *fiber.Ctx) error {
     return c.JSON(fiber.Map{"token": tokenString})
 }
 
-
+// Register é um manipulador de rota para o processo de registro
+// @Summary Processo de registro
+// @Description Processo de registro
+// @ID register
+// @Accept json
+// @Produce json
+// @Param body body models.LoginRequest true "Credenciais de registro"
+// @Success 200 {object} TokenResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Router /register [post]
 func Register(c *fiber.Ctx) error {
     // Parse do corpo da requisição para obter os dados do novo usuário
     var userData models.LoginRequest
@@ -56,20 +79,28 @@ func Register(c *fiber.Ctx) error {
 
 	log.Print(userData)
 
-	// // Verificar se o usuário já existe
-	// existingUser, err := models.GetUserByUsername(userData.Username)
-	// if err != nil {
-	// 	// Se ocorrer um erro ao verificar o usuário, retorne um erro interno do servidor
-	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Erro ao verificar o usuário"})
-	// }
-	// if existingUser != nil {
-	// 	// Se o usuário já existir, retorne um erro de solicitação inválida
-	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Usuário já existe"})
-	// }
+   
+	existingUser, err := models.GetUserByUsername(userData.Username)
+    
+    log.Print(existingUser)
+	if existingUser != nil {
+		// Se o usuário já existir, retorne um erro de solicitação inválida
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Username Já Em Uso"})
+	}else{
+        models.CreateUser(userData)
+    }
 
+    // Se houver um erro ao verificar se o usuário já existe, registre o erro e retorne um erro interno do servidor
+    if err == nil {
+        log.Print("Error checking user existence:", err)
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Falha ao verificar a existência do usuário"})
+    }
+   
 
-    // // Criptografar a senha do novo usuário
-    // userData.Password = models.CryptPassword(userData.Password)
+    log.Print(err)
+
+    // Criptografar a senha do novo usuário
+    userData.Password = models.CryptPassword(userData.Password)
 
    
 

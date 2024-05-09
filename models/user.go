@@ -29,13 +29,13 @@ type LoginRequest struct {
 
 
 func CheckCredentials(username, password string) bool {
-    // Consultar o banco de dados para obter as credenciais do usuário
+	log.Print("CheckCredentials")
     user, err := GetUserByUsername(username)
     if err != nil {
-        // Se ocorrer um erro ao consultar o banco de dados, considere as credenciais inválidas
+		log.Print(err)
         return false
     }
-
+	log.Print(user)
     // Verificar se a senha fornecida corresponde à senha armazenada no banco de dados
     return checkPasswordHash(password, user.Password)
 }
@@ -52,7 +52,7 @@ func GetUserByUsername(username string) (*UserAccount, error) {
 
 	var user UserAccount
 	collection := client.Database("market").Collection("users")
-	err = collection.FindOne(context.Background(), bson.M{"username": username}).Decode(&user)
+	err = collection.FindOne(context.Background(), bson.M{"Username": username}).Decode(&user)
 	if err != nil {
 		return nil, errors.New("Usuário não encontrado")
 	}
@@ -167,6 +167,9 @@ func CryptPassword(password string) string {
 	log.Print(hashedString)
     return hashedString
 }
+
+
+
 
 
 //    // Buscar documentos da coleção
