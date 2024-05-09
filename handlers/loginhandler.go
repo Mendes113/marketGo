@@ -77,7 +77,7 @@ func Register(c *fiber.Ctx) error {
         return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Falha ao analisar os dados de registro"})
     }
 
-	log.Print(userData)
+	log.Print("user data:", userData)
 
    
 	existingUser, err := models.GetUserByUsername(userData.Username)
@@ -99,8 +99,7 @@ func Register(c *fiber.Ctx) error {
 
     log.Print(err)
 
-    // Criptografar a senha do novo usuário
-    userData.Password = models.CryptPassword(userData.Password)
+   
 
    
 
@@ -128,6 +127,6 @@ func Register(c *fiber.Ctx) error {
         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Falha ao registrar o usuário"})
     }
 
-    // Retorne o token JWT para o novo usuário
+    log.Print("User created successfully")
     return c.JSON(fiber.Map{"token": tokenString})
 }

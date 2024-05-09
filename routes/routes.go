@@ -160,5 +160,5 @@ func Setup(app *fiber.App) {
 	}))
 
 	// Inicia o servidor na porta 3000
-	app.Listen(":3000")
+	app.Listen(":3002")
 }
