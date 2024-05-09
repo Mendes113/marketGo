@@ -1,11 +1,31 @@
-basePath: /
 definitions:
+  models.AuthResponse:
+    properties:
+      error:
+        type: string
+      token:
+        type: string
+    type: object
   models.InvoiceRequest:
     properties:
       total_quantity:
+        minimum: 1
         type: integer
       uuid_product:
         type: string
+    required:
+    - total_quantity
+    - uuid_product
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
     type: object
   models.Market:
     properties:
@@ -14,6 +34,8 @@ definitions:
       location:
         type: string
       name:
+        maxLength: 50
+        minLength: 3
         type: string
       owner:
         type: string
@@ -23,6 +45,10 @@ definitions:
         type: array
       uuid:
         type: string
+    required:
+    - email
+    - location
+    - name
     type: object
   models.Product:
     properties:
@@ -31,18 +57,22 @@ definitions:
       price:
         type: number
       product_name:
+        maxLength: 50
+        minLength: 3
         type: string
       quantity:
         type: integer
       uuid_product:
         type: string
+    required:
+    - market_uuid
+    - price
+    - product_name
+    - quantity
+    - uuid_product
     type: object
-host: localhost:3000
 info:
   contact: {}
-  description: API para gerenciar mercados e produtos
-  title: MarketGo API
-  version: "1.0"
 paths:
   /invoices:
     post:
@@ -67,6 +97,35 @@ paths:
       summary: Create a new invoice
       tags:
       - invoices
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Processo de login
+      operationId: login
+      parameters:
+      - description: Credenciais de login
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.AuthResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.AuthResponse'
+      summary: Processo de login
   /markets:
     get:
       description: Get list of markets
@@ -138,6 +197,33 @@ paths:
           schema:
             $ref: '#/definitions/models.Market'
       summary: Get a market by ID
+      tags:
+      - markets
+    put:
+      consumes:
+      - application/json
+      description: Update a market by ID
+      operationId: update-market
+      parameters:
+      - description: Market ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Market object that needs to be updated
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Market'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Market'
+      summary: Update a market by ID
       tags:
       - markets
   /products:
@@ -216,8 +302,33 @@ paths:
       summary: Update a product by ID
       tags:
       - products
-produces:
-- application/json
-schemes:
-- http
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Processo de registro
+      operationId: register
+      parameters:
+      - description: Credenciais de registro
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.AuthResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.AuthResponse'
+      summary: Processo de registro
 swagger: "2.0"

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
+	_"marketgo/docs"
 )
 
 func Setup(app *fiber.App) {
@@ -43,17 +44,7 @@ func Setup(app *fiber.App) {
 	*/
 	protectedRoutes.Post("/markets", handlers.InsertMarket)
 
-	// Rota para obter um mercado por ID
-	/**
-	* @Summary Get a market by ID
-	* @Description Get a market by ID
-	* @ID get-market
-	* @Produce json
-	* @Param id path int true "Market ID"
-	* @Success 200 {object} Market
-	* @Router /api/markets/{id} [get]
-	*/
-	protectedRoutes.Get("/markets/:id", handlers.GetMarket)
+	
 
 	// Rota para atualizar um mercado por ID
 	/**

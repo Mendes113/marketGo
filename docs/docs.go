@@ -5,9 +5,6 @@ import "github.com/swaggo/swag"
 
 const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
-    "produces": [
-        "application/json"
-    ],
     "swagger": "2.0",
     "info": {
         "description": "{{escape .Description}}",
@@ -48,6 +45,50 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/models.InvoiceRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Processo de login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Processo de login",
+                "operationId": "login",
+                "parameters": [
+                    {
+                        "description": "Credenciais de login",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LoginRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthResponse"
                         }
                     }
                 }
@@ -128,6 +169,46 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Market"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a market by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "markets"
+                ],
+                "summary": "Update a market by ID",
+                "operationId": "update-market",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Market ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Market object that needs to be updated",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Market"
+                        }
                     }
                 ],
                 "responses": {
@@ -274,22 +355,102 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/register": {
+            "post": {
+                "description": "Processo de registro",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Processo de registro",
+                "operationId": "register",
+                "parameters": [
+                    {
+                        "description": "Credenciais de registro",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "models.InvoiceRequest": {
+        "models.AuthResponse": {
             "type": "object",
             "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InvoiceRequest": {
+            "type": "object",
+            "required": [
+                "total_quantity",
+                "uuid_product"
+            ],
+            "properties": {
                 "total_quantity": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "uuid_product": {
                     "type": "string"
                 }
             }
         },
+        "models.LoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Market": {
             "type": "object",
+            "required": [
+                "email",
+                "location",
+                "name"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -298,7 +459,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
                 },
                 "owner": {
                     "type": "string"
@@ -316,6 +479,13 @@ const docTemplate = `{
         },
         "models.Product": {
             "type": "object",
+            "required": [
+                "market_uuid",
+                "price",
+                "product_name",
+                "quantity",
+                "uuid_product"
+            ],
             "properties": {
                 "market_uuid": {
                     "type": "string"
@@ -324,7 +494,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "product_name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
                 },
                 "quantity": {
                     "type": "integer"
@@ -339,12 +511,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:3000",
-	BasePath:         "/",
-	Schemes:          []string{"http"},
-	Title:            "MarketGo API",
-	Description:      "API para gerenciar mercados e produtos",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
+	Schemes:          []string{},
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

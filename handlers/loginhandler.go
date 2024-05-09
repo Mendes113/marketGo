@@ -17,9 +17,9 @@ import (
 // @Accept json
 // @Produce json
 // @Param body body models.LoginRequest true "Credenciais de login"
-// @Success 200 {object} TokenResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
+// @Success 200 {object} models.LoginRequest
+// @Failure 400  {object} models.AuthResponse
+// @Failure 401 {object} models.AuthResponse
 // @Router /login [post]
 func LoginHandler(c *fiber.Ctx) error {
     // Parse do corpo da requisição para obter as credenciais do usuário
@@ -66,9 +66,9 @@ func LoginHandler(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param body body models.LoginRequest true "Credenciais de registro"
-// @Success 200 {object} TokenResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
+// @Success 200 {object} models.AuthResponse
+// @Failure 400 {object} models.AuthResponse
+// @Failure 401 {object} models.AuthResponse
 // @Router /register [post]
 func Register(c *fiber.Ctx) error {
     // Parse do corpo da requisição para obter os dados do novo usuário

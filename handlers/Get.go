@@ -90,14 +90,17 @@ func GetMarket(c *fiber.Ctx) error {
   return c.JSON(market)
 }
 
-// DeleteMarket is a handler that deletes a market by ID
+// UpdateMarket is a handler that updates a market by ID
 //@Tags markets
-//@Summary Delete a market by ID
-//@Description Delete a market by ID
-//@ID delete-market
+//@Summary Update a market by ID
+//@Description Update a market by ID
+//@ID update-market
+//@Accept json
+//@Produce json
 //@Param id path int true "Market ID"
-//@Success 204
-//@Router /markets/{id} [delete]
+//@Param body body models.Market true "Market object that needs to be updated"
+//@Success 200 {object} models.Market
+//@Router /markets/{id} [put]
 func UpdateMarket(c *fiber.Ctx) error {
   id := c.Params("id")
   var market models.Market

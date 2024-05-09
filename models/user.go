@@ -26,6 +26,11 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type AuthResponse struct {
+	Token string `json:"token"`
+	Error string `json:"error"`
+}
+
 
 
 func CheckCredentials(username, password string) bool {
