@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"marketgo/models"
+	"marketgo/service"
 	"os"
 	"time"
 
@@ -21,6 +22,7 @@ import (
 // @Failure 400  {object} models.AuthResponse
 // @Failure 401 {object} models.AuthResponse
 // @Router /login [post]
+// LoginHandler é um manipulador de rota para o processo de login
 func LoginHandler(c *fiber.Ctx) error {
     // Parse do corpo da requisição para obter as credenciais do usuário
     var loginData models.LoginRequest
@@ -32,6 +34,11 @@ func LoginHandler(c *fiber.Ctx) error {
     if isValid := models.CheckCredentials(loginData.Username, loginData.Password); !isValid {
         return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Credenciais inválidas"})
     }
+
+    // Atualizar o timestamp do último login
+    existingUser, _ := models.GetUserByUsername(loginData.Username)
+    existingUser.LastLogin = time.Now()
+    existingUser.Save() // Certifique-se de implementar o método Save() no seu modelo de usuário
 
     // Se as credenciais forem válidas, crie e assine um token JWT
     // Obtenha a chave secreta da variável de ambiente
@@ -55,9 +62,13 @@ func LoginHandler(c *fiber.Ctx) error {
         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Falha ao gerar o token"})
     }
 
+    //login time
+    service.SetupEmail("New login: "+ existingUser.LastLogin.String(), loginData.Email)
+
     // Retorne o token JWT para o cliente
     return c.JSON(fiber.Map{"token": tokenString})
 }
+
 
 // Register é um manipulador de rota para o processo de registro
 // @Summary Processo de registro
@@ -89,13 +100,16 @@ func Register(c *fiber.Ctx) error {
 	}else{
         models.CreateUser(userData)
     }
+    
+    // Enviar um email de boas-vindas ao novo usuário
+    service.SetupEmail("Bem-vindo ao MarketGo!", userData.Email)
 
     // Se houver um erro ao verificar se o usuário já existe, registre o erro e retorne um erro interno do servidor
     if err == nil {
         log.Print("Error checking user existence:", err)
         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Falha ao verificar a existência do usuário"})
     }
-   
+    
 
     log.Print(err)
 
@@ -130,3 +144,6 @@ func Register(c *fiber.Ctx) error {
     log.Print("User created successfully")
     return c.JSON(fiber.Map{"token": tokenString})
 }
+
+
+

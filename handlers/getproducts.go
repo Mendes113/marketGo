@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"marketgo/models"
+	
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -136,6 +137,8 @@ func UpdateProduct(c *fiber.Ctx) error {
 		log.Println("Error updating product:", err)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
+
+
 	
 	return c.SendStatus(fiber.StatusOK)
 }

@@ -17,6 +17,7 @@ func Setup(app *fiber.App) {
 	// Rota para registro de usuário
 	app.Post("/register", handlers.Register)
 
+
 	// Rotas protegidas com autenticação JWT
 	protectedRoutes := app.Group("/api/", auth.AuthMiddleware)
 

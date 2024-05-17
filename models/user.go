@@ -7,7 +7,7 @@ import (
 	"errors"
 	"log"
 	"marketgo/db"
-	
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,11 +19,13 @@ type UserAccount struct {
 	UUID string `json:"uuid" validate:"required"`
 	Username string `json:"username" validate:"required" min=3,max=50`
 	Password string `json:"password" validate:"required"`
+	LastLogin time.Time `json:"last_login" db:"last_login"`
 }
 
 type LoginRequest struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
+	Email string `json:"email"`
 }
 
 type AuthResponse struct {
@@ -173,37 +175,64 @@ func CryptPassword(password string) string {
     return hashedString
 }
 
+func GetUserByEmail(email string) (*UserAccount, error) {
+	client, err := db.OpenConnection()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close(client)
+
+	var user UserAccount
+	collection := client.Database("market").Collection("users")
+	err = collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		return nil, errors.New("usuário nao encontrado")
+	}
+
+	return &user, nil
+}
 
 
+func UpdatePassword(username, password string) error {
+	client, err := db.OpenConnection()
+	if err != nil {
+		return err
+	}
+	defer db.Close(client)
+
+	collection := client.Database("market").Collection("users")
+	_, err = collection.UpdateOne(context.Background(), bson.M{"username": username}, bson.M{"$set": bson.M{"password": password}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 
-//    // Buscar documentos da coleção
-//    var documents []bson.M
-//    collection := client.Database("market").Collection("products")
-//    cursor, err := collection.Find(context.Background(), bson.M{})
-//    if err != nil {
-// 	   return nil, err
-//    }
-//    defer cursor.Close(context.Background())
+func (user *UserAccount) Save() error {
+    // Abrir uma conexão com o banco de dados
+    client, err := db.OpenConnection()
+    if err != nil {
+        return err
+    }
+    defer db.Close(client)
 
-//    // Iterar sobre os documentos retornados pelo cursor
-//    for cursor.Next(context.Background()) {
-// 	   var document bson.M
-// 	   if err := cursor.Decode(&document); err != nil {
-// 		   return nil, err
-// 	   }
-// 	   documents = append(documents, document)
-//    }
+    // Atualizar o documento do usuário no banco de dados
+    collection := client.Database("market").Collection("users")
+    _, err = collection.UpdateOne(
+        context.Background(),
+        bson.M{"uuid": user.UUID},
+        bson.M{"$set": bson.M{
+            "username":     user.Username,
+            "password":     user.Password,
+            "last_login":   user.LastLogin,
+        }},
+    )
+    if err != nil {
+        return err
+    }
 
-//    if err := cursor.Err(); err != nil {
-// 	   return nil, err
-//    }
-
-//    // Serializar os documentos para JSON
-//    jsonData, err := json.Marshal(documents)
-//    if err != nil {
-// 	   return nil, err
-//    }
-
-//    return jsonData, nil
-// }
+    log.Print("User updated successfully")
+    return nil
+}
