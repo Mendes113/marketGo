@@ -42,3 +42,5 @@ To run the tests, you can run `go test ./...` in the root directory of the proje
 - Fiber
 - GORM
 - Swagger
+- JWT
+- ElasticMail
