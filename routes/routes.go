@@ -2,11 +2,15 @@ package routes
 
 import (
 	"marketgo/auth"
+	"marketgo/graphql"
 	"marketgo/handlers"
 
+	_ "marketgo/docs"
+
+	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
-	_"marketgo/docs"
+	"github.com/graphql-go/handler"
 )
 
 func Setup(app *fiber.App) {
@@ -160,6 +164,17 @@ func Setup(app *fiber.App) {
 		OAuth2RedirectUrl: "http://localhost:8080/swagger/oauth2-redirect.html",
 	}))
 
+
+	// Rota para o endpoint GraphQL
+	graphqlHandler := handler.New(&handler.Config{
+		Schema:   &graphql.Schema,
+		Pretty:   true,
+		GraphiQL: true, // Enable GraphiQL interface
+	})
+	app.All("/graphql", adaptor.HTTPHandlerFunc(graphqlHandler.ServeHTTP))
+
+
+	
 	// Inicia o servidor na porta 3000
 	app.Listen(":3002")
 }
